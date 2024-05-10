@@ -39,6 +39,11 @@ app.use(session({
 // 라우팅 설정
 app.use('/api', routes);
 
+// 메인 화면 제공
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views/main.html'));
+});
+
 // 회원가입 및 로그인 페이지 제공
 app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'views/signup.html'));
