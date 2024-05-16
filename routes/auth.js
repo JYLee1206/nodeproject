@@ -1,48 +1,52 @@
 const express = require('express');
-const router = express.Router();
-const User = require('../schemas/user');
+const passport = require('passport');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
+const User = require('../models/user');
 
-router.post('/signup', async (req, res) => {
+const router = express.Router();
+
+router.post('/join', isNotLoggedIn, async (req, res, next) => {
+  const { email, nick, password } = req.body;
   try {
-    const { id, password, name, studentId } = req.body;
-
-    // 새로운 사용자 생성
-    const user = new User({ id, password, name, studentId });
-    await user.save();
-
-    res.status(201).json({ message: '회원가입 성공' });
-  } catch (error) {
-    res.status(400).json({ error: '회원가입 실패', details: error });
-  }
-});
-
-router.post('/login', async (req, res) => {
-  try {
-    const { id, password } = req.body;
-
-    // 사용자를 데이터베이스에서 찾음
-    const user = await User.findOne({ id });
-    if (!user) {
-      return res.status(404).json({ error: '사용자를 찾을 수 없음' });
+    const exUser = await User.findOne({ where: { email } });
+    if (exUser) {
+      return res.redirect('/join?error=exist');
     }
-
-    // 비밀번호 확인
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: '비밀번호가 일치하지 않습니다' });
-    }
-
-    // JWT 토큰 생성
-    const token = jwt.sign({ userId: user._id }, 'your_secret_key', {
-      expiresIn: '1h',
+    const hash = await bcrypt.hash(password, 12);
+    await User.create({
+      email,
+      nick,
+      password: hash,
     });
-
-    res.json({ message: '로그인 성공', token });
+    return res.redirect('/');
   } catch (error) {
-    res.status(400).json({ error: '로그인 실패', details: error });
+    console.error(error);
+    return next(error);
   }
 });
 
-module.exports = router;
+router.post('/login', isNotLoggedIn, (req, res, next) => {
+  passport.authenticate('local', (authError, user, info) => {
+    if (authError) {
+      console.error(authError);
+      return next(authError);
+    }
+    if (!user) {
+      return res.redirect(`/?loginError=${info.message}`);
+    }
+    return req.login(user, (loginError) => {
+      if (loginError) {
+        console.error(loginError);
+        return next(loginError);
+      }
+      return res.redirect('/');
+    });
+  })(req, res, next); // 미들웨어 내의 미들웨어에는 (req, res, next)를 붙입니다.
+});
+
+router.get('/logout', isLoggedIn, (req, res) => {
+  req.logout();
+  req.session.destroy();
+  res.redirect('/');
+});
