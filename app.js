@@ -6,9 +6,14 @@ const session = require('express-session');
 const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
 const connect = require('./schemas');
-const routes = require('./routes/index')
 dotenv.config();
+const pageRouter = require('./routes/page');
+const authRouter = require('./routes/auth');
+const userRouter = require('./routes/user');
+const passportConfig = require('./passport');
 
+
+passportConfig(); // 패스포트 설정
 const app = express();
 app.set('port', process.env.PORT || 8001);
 app.set('view engine', 'html');
@@ -36,22 +41,29 @@ app.use(session({
   },
 }));
 
-// 라우팅 설정
-app.use('/api', routes);
 
-// 메인 화면 제공
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views/main.html'));
+
+app.use('/', pageRouter);
+app.use('/auth', authRouter);
+app.use('/user', userRouter);
+
+app.use((req, res, next) => {
+  const error =  new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
+  error.status = 404;
+  next(error);
 });
 
-// 회원가입 및 로그인 페이지 제공
-app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views/signup.html'));
+app.use((err, req, res, next) => {
+  res.locals.message = err.message;
+  res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
+  res.status(err.status || 500);
+  res.render('error');
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views/login.html'));
+app.listen(app.get('port'), () => {
+  console.log(app.get('port'), '번 포트에서 대기중');
 });
+
 
 
 app.listen(app.get('port'), () => {
