@@ -1,48 +1,73 @@
+// routes/auth.js
 const express = require('express');
-const router = express.Router();
-const User = require('../schemas/user');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const router = express.Router();
+const User = require('../models/User');
 
-router.post('/signup', async (req, res) => {
-  try {
-    const { id, password, name, studentId } = req.body;
-
-    // 새로운 사용자 생성
-    const user = new User({ id, password, name, studentId });
-    await user.save();
-
-    res.status(201).json({ message: '회원가입 성공' });
-  } catch (error) {
-    res.status(400).json({ error: '회원가입 실패', details: error });
-  }
+// 로그인 페이지 라우트
+router.get('/login', (req, res) => {
+    if (req.session.isAuthenticated) {
+        return res.redirect('/');
+    }
+    res.render('login.njk');
 });
 
+// 로그인 양식 제출 처리
 router.post('/login', async (req, res) => {
-  try {
-    const { id, password } = req.body;
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
 
-    // 사용자를 데이터베이스에서 찾음
-    const user = await User.findOne({ id });
-    if (!user) {
-      return res.status(404).json({ error: '사용자를 찾을 수 없음' });
+        if (!user) {
+            return res.status(400).send('이메일 또는 비밀번호가 올바르지 않습니다.');
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(400).send('이메일 또는 비밀번호가 올바르지 않습니다.');
+        }
+
+        // 로그인 성공 시 세션에 사용자 정보 저장 또는 토큰 발급 등의 작업 수행
+        // 여기에서는 단순히 성공 메시지를 보내지 않고 메인 페이지로 리디렉션합니다.
+        req.session.isAuthenticated = true;
+        req.session.userEmail = email;
+        res.redirect('/');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('서버 오류가 발생했습니다.');
     }
+});
 
-    // 비밀번호 확인
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: '비밀번호가 일치하지 않습니다' });
+// 회원가입 페이지 라우트
+router.get('/signup', (req, res) => {
+    if (req.session.isAuthenticated) {
+        return res.redirect('/');
     }
+    res.render('signup.njk');
+});
 
-    // JWT 토큰 생성
-    const token = jwt.sign({ userId: user._id }, 'your_secret_key', {
-      expiresIn: '1h',
+// 회원가입 양식 제출 처리
+router.post('/signup', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({ username, email, password: hashedPassword });
+        await user.save();
+        res.redirect('/'); // 회원가입 성공 시 메인 페이지로 이동
+    } catch (err) {
+        console.error(err);
+        res.redirect('/'); // 회원가입 실패 시 메인 페이지로 이동
+    }
+});
+
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('로그아웃 중 오류가 발생했습니다.');
+        }
+        res.redirect('/');
     });
-
-    res.json({ message: '로그인 성공', token });
-  } catch (error) {
-    res.status(400).json({ error: '로그인 실패', details: error });
-  }
 });
 
 module.exports = router;

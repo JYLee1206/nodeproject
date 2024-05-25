@@ -1,71 +1,42 @@
+// app.js
 const express = require('express');
-const cookieParser = require('cookie-parser');
-const morgan = require('morgan');
-const path = require('path');
 const session = require('express-session');
+const mongoose = require('mongoose');
 const nunjucks = require('nunjucks');
-const dotenv = require('dotenv');
-const connect = require('./schemas');
-dotenv.config();
-const pageRouter = require('./routes/page');
-const authRouter = require('./routes/auth');
-const userRouter = require('./routes/user');
-const passportConfig = require('./passport');
-
-
-passportConfig(); // 패스포트 설정
+const bcrypt = require('bcrypt');
 const app = express();
-app.set('port', process.env.PORT || 8001);
-app.set('view engine', 'html');
-nunjucks.configure('views', {
-  express: app,
-  watch: true,
-});
-connect();
 
-app.use(express.json());
-app.use(morgan('dev'));
-// 정적 파일 제공
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'views')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
+// 세션 미들웨어 설정
 app.use(session({
-  resave: false,
-  saveUninitialized: false,
-  secret: process.env.COOKIE_SECRET,
-  cookie: {
-    httpOnly: true,
-    secure: false,
-  },
+    secret: 'mySecret', // 세션 암호화에 사용되는 비밀 키
+    resave: false,
+    saveUninitialized: false
 }));
 
+// MongoDB 연결
+mongoose.connect('mongodb://localhost:27017/myapp', { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('MongoDB 연결 성공'))
+    .catch(err => console.error('MongoDB 연결 실패', err));
 
-
-app.use('/', pageRouter);
-app.use('/auth', authRouter);
-app.use('/user', userRouter);
-
-app.use((req, res, next) => {
-  const error =  new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
-  error.status = 404;
-  next(error);
+// 뷰 엔진 설정
+nunjucks.configure('views', {
+    autoescape: true,
+    express: app
 });
 
-app.use((err, req, res, next) => {
-  res.locals.message = err.message;
-  res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
-  res.status(err.status || 500);
-  res.render('error');
-});
+// 미들웨어 설정
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-app.listen(app.get('port'), () => {
-  console.log(app.get('port'), '번 포트에서 대기중');
-});
+// 라우트 설정
+const mainRoutes = require('./routes/main');
+app.use('/', mainRoutes);
 
+const authRoutes = require('./routes/auth');
+app.use('/', authRoutes);
 
-
-app.listen(app.get('port'), () => {
-  console.log(app.get('port'), '번 포트에서 대기 중');
+// 서버 시작
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
 });

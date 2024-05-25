@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="slide_style.css">
+
+    <style>
+        .login-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 1001; /* 메뉴바 위에 배치 */
+        }
+
+        .login-button:hover {
+            background-color: #45a049;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 1001; /* 메뉴바 위에 배치 */
+        }
+
+        .logout-button:hover {
+            background-color: #45a049;
+        }
+
+        .signup-button {
+            position: absolute;
+            top: 10px;
+            right: 100px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 1001; /* 메뉴바 위에 배치 */
+        }
+
+         .signup-button:hover {
+            background-color: #45a049;
+        }
+
+    </style>
+</head>
+<body>
+        
+    {% if isAuthenticated %}
+    <a class="logout-button" href="/logout">로그아웃</a>
+    {% else %}
+    <a class="signup-button" href="/signup">회원가입</a>
+    <a class="login-button" href="/login">Login</a>
+    {% endif %}
+</body>
+</html>
