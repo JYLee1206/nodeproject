@@ -26,12 +26,17 @@ router.post('/login', async (req, res) => {
         if (!validPassword) {
             return res.status(400).send('이메일 또는 비밀번호가 올바르지 않습니다.');
         }
+        
+        // 쿠키 설정
+        res.cookie("user", email, {
+            expires: new Date(Date.now() + 900000),
+            httpOnly: true
+        });
 
-        // 로그인 성공 시 세션에 사용자 정보 저장 또는 토큰 발급 등의 작업 수행
-        // 여기에서는 단순히 성공 메시지를 보내지 않고 메인 페이지로 리디렉션합니다.
+        // 로그인 성공 시 세션에 사용자 정보 저장
         req.session.isAuthenticated = true;
         req.session.userEmail = email;
-        req.session.username = username;
+        req.session.username = user.username; // 사용자 이름 저장
         res.redirect('/');
     } catch (err) {
         console.error(err);
@@ -61,12 +66,14 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+// 로그아웃 라우트
 router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error(err);
             return res.status(500).send('로그아웃 중 오류가 발생했습니다.');
         }
+        res.clearCookie('user'); // 사용자 정보 쿠키 삭제
         res.redirect('/');
     });
 });

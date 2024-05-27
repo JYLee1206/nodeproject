@@ -3,6 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const nunjucks = require('nunjucks');
+const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const app = express();
 
@@ -10,7 +11,10 @@ const app = express();
 app.use(session({
     secret: 'mySecret', // 세션 암호화에 사용되는 비밀 키
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 24000 * 60 * 60 //쿠키 유효기간 24시간
+    }
 }));
 
 // MongoDB 연결
@@ -35,6 +39,7 @@ nunjucks.configure('views', {
 
 // 미들웨어 설정
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static('public'));
 
 // 라우트 설정
