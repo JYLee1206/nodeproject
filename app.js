@@ -9,6 +9,7 @@ const app = express();
 
 // 세션 미들웨어 설정
 app.use(session({
+    key: 'sid',
     secret: 'mySecret', // 세션 암호화에 사용되는 비밀 키
     resave: false,
     saveUninitialized: true,

@@ -36,13 +36,14 @@ router.post('/login', async (req, res) => {
         // 로그인 성공 시 세션에 사용자 정보 저장
         req.session.isAuthenticated = true;
         req.session.userEmail = email;
-        req.session.username = user.username; // 사용자 이름 저장
+
         res.redirect('/');
     } catch (err) {
         console.error(err);
         res.status(500).send('서버 오류가 발생했습니다.');
     }
 });
+
 
 // 회원가입 페이지 라우트
 router.get('/signup', (req, res) => {
@@ -73,7 +74,7 @@ router.get('/logout', (req, res) => {
             console.error(err);
             return res.status(500).send('로그아웃 중 오류가 발생했습니다.');
         }
-        res.clearCookie('user'); // 사용자 정보 쿠키 삭제
+        res.clearCookie('sid'); // 사용자 정보 쿠키 삭제
         res.redirect('/');
     });
 });
