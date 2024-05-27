@@ -5,7 +5,12 @@ const mongoose = require('mongoose');
 const nunjucks = require('nunjucks');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
+const path = require('path');
 const app = express();
+
+
+//정적 파일들을 제공하는 폴더
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 세션 미들웨어 설정
 app.use(session({
@@ -38,10 +43,8 @@ nunjucks.configure('views', {
     express: app
 });
 
-// 미들웨어 설정
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static('public'));
 
 // 라우트 설정
 const mainRoutes = require('./routes/main');
