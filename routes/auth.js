@@ -31,6 +31,7 @@ router.post('/login', async (req, res) => {
         // 여기에서는 단순히 성공 메시지를 보내지 않고 메인 페이지로 리디렉션합니다.
         req.session.isAuthenticated = true;
         req.session.userEmail = email;
+        req.session.username = username;
         res.redirect('/');
     } catch (err) {
         console.error(err);

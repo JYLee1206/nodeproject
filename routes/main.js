@@ -6,10 +6,13 @@ const router = express.Router();
 router.get('/', (req, res) => {
     const isAuthenticated = req.session.isAuthenticated || false;
     const userEmail = req.session.userEmail || '';
+    const username = req.session.userEmail || '';
+
 
     res.render('index.njk', {
         isAuthenticated,
-        userEmail
+        userEmail,
+        username
     });
 });
 

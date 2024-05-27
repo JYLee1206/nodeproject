@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="slide_style.css">
 
     <style>
+        .username-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: white;
+        font-size: 16px;
+        z-index: 1001; /* 다른 요소 위에 배치 */
+    }
         .login-button {
             position: absolute;
             top: 10px;
@@ -76,12 +84,11 @@
     </style>
 </head>
 <body>
-        
     {% if isAuthenticated %}
     <a class="logout-button" href="/logout">로그아웃</a>
     {% else %}
     <a class="signup-button" href="/signup">회원가입</a>
-    <a class="login-button" href="/login">Login</a>
+    <a class="login-button" href="/login">로그인</a>
     {% endif %}
 </body>
 </html>

@@ -14,7 +14,7 @@ app.use(session({
 }));
 
 // MongoDB 연결
-mongoose.connect('mongodb://localhost:27017/myapp', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://root:1234@localhost:27017/', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB 연결 성공'))
     .catch(err => console.error('MongoDB 연결 실패', err));
 // 에러 및 연결 끊김 이벤트 리스너
