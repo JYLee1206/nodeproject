@@ -24,7 +24,7 @@ app.use(session({
 }));
 
 // MongoDB 연결
-mongoose.connect('mongodb://root:1234@localhost:27017/', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://201905060:1234@localhost:27017/', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB 연결 성공'))
     .catch(err => console.error('MongoDB 연결 실패', err));
 // 에러 및 연결 끊김 이벤트 리스너
@@ -54,7 +54,7 @@ const authRoutes = require('./routes/auth');
 app.use('/', authRoutes);
 
 // 서버 시작
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
     console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
 });
