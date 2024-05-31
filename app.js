@@ -7,11 +7,13 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const app = express();
+const bodyParser = require('body-parser');
 
 
 //정적 파일들을 제공하는 폴더
 app.use(express.static(path.join(__dirname, 'public')));
-
+//json 파싱
+app.use(bodyParser.json());
 // 세션 미들웨어 설정
 app.use(session({
     key: 'sid',

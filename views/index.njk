@@ -25,7 +25,8 @@
                             <p>Next:</p>
                             <canvas id="next" width="150px" height="150px" style="background-color:black;">
                             </canvas>
-                            <p>LINES:<span id="lines">0</span></p>
+                            <p>LINES: <span id="lines">0</span></p>
+                            <p>Score: <span id="score">0</span></p> <!-- 점수 표시 영역 -->
                             <p><span id="message"></span></p>
                             <div class="tetris-panel-container-padding"></div>
                             <table class="tetris-button-panel">
@@ -52,6 +53,16 @@
     {% else %}
     <a class="signup-button" href="/signup">회원가입</a>
     <a class="login-button" href="/login">로그인</a>
+
+    <!-- 상위 10명 유저의 점수 표시 -->
+    <h2>Top 10 Scores</h2>
+    <ul>
+        {% for user in topUsers %}
+            <li>{{ user.username }}: {{ user.highScore }}</li>
+        {% endfor %}
+    </ul>
     {% endif %}
+
+    
 </body>
 </html>

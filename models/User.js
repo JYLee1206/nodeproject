@@ -1,4 +1,5 @@
-// models/User.js
+//models/User.js
+
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -14,6 +15,10 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    highScore: {
+        type: Number,
+        default: 0
     }
 });
 

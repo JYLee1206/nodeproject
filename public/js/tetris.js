@@ -1,3 +1,5 @@
+//public/js/tetris.js
+
 class Tetris {
     constructor() {
         this.stageWidth = 10;
@@ -11,6 +13,7 @@ class Tetris {
         this.stageTopPadding = (this.stageCanvas.height - this.cellSize * this.stageHeight) / 2;
         this.blocks = this.createBlocks();
         this.deletedLines = 0;
+        this.score = 0;
 
         window.onkeydown = (e) => {
             if (e.keyCode === 37) {
@@ -168,6 +171,27 @@ class Tetris {
         setTimeout(this.mainLoop.bind(this), 500);
     }
 
+    gameOver() {
+        let messageElem = document.getElementById("message");
+        messageElem.innerText = "GAME OVER";
+        const score = this.score; // 현재 점수 가져오기
+        fetch('/updateHighScore', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ score: this.score })
+        }).then(response => {
+            if (response.ok) {
+                console.log('점수가 성공적으로 저장되었습니다.');
+            } else {
+                console.error('점수 저장에 실패했습니다.');
+            }
+        }).catch(error => {
+            console.error('점수 저장 중 오류 발생:', error);
+        });
+    }
+
     createNewBlock() {
         this.currentBlock = this.nextBlock;
         this.nextBlock = this.getRandomBlock();
@@ -176,12 +200,12 @@ class Tetris {
         this.blockAngle = 0;
         this.drawNextBlock();
         if (!this.checkBlockMove(this.blockX, this.blockY, this.currentBlock, this.blockAngle)) {
-            let messageElem = document.getElementById("message");
-            messageElem.innerText = "GAME OVER";
+            this.gameOver();
             return false;
         }
         return true;
     }
+
 
     drawNextBlock() {
         this.clear(this.nextCanvas);
@@ -190,7 +214,7 @@ class Tetris {
     }
 
     getRandomBlock() {
-        return  Math.floor(Math.random() * 7);
+        return Math.floor(Math.random() * 7);
     }
 
     fallBlock() {
@@ -227,6 +251,7 @@ class Tetris {
                 this.virtualStage[cellX][cellY] = type;
             }
         }
+        let linesCleared = 0;
         for (let y = this.stageHeight - 1; y >= 0; ) {
             let filled = true;
             for (let x = 0; x < this.stageWidth; x++) {
@@ -244,13 +269,26 @@ class Tetris {
                 for (let x = 0; x < this.stageWidth; x++) {
                     this.virtualStage[x][0] = null;
                 }
-            let linesElem = document.getElementById("lines");
+                linesCleared++;
+                let linesElem = document.getElementById("lines");
                 this.deletedLines++;
                 linesElem.innerText = "" + this.deletedLines;
             } else {
                 y--;
             }
         }
+
+        // 점수 계산
+        if (linesCleared > 0) {
+            this.updateScore(linesCleared);
+        }
+    }
+
+    updateScore(linesCleared) {
+        const scorePerLines = [0, 100, 300, 500, 800];
+        this.score += scorePerLines[linesCleared];
+        let scoreElem = document.getElementById("score");
+        scoreElem.innerText = "Score: " + this.score;
     }
 
     drawStage() {
@@ -305,9 +343,9 @@ class Tetris {
     }
 
     refreshStage() {
-      this.clear(this.stageCanvas);
-      this.drawStage();
-      this.drawBlock(this.stageLeftPadding + this.blockX * this.cellSize,
+        this.clear(this.stageCanvas);
+        this.drawStage();
+        this.drawBlock(this.stageLeftPadding + this.blockX * this.cellSize,
                 this.stageTopPadding + this.blockY * this.cellSize,
                 this.currentBlock, this.blockAngle, this.stageCanvas);
     }
@@ -317,4 +355,11 @@ class Tetris {
         context.fillStyle = "rgb(0, 0, 0)";
         context.fillRect(0, 0, canvas.width, canvas.height);
     }
+
 }
+
+
+// 게임 시작시 아래 코드를 추가해 점수 요소를 초기화합니다.
+let tetrisGame = new Tetris();
+document.getElementById("score").innerText = "Score: 0";
+tetrisGame.startGame();

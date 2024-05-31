@@ -79,4 +79,19 @@ router.get('/logout', (req, res) => {
     });
 });
 
+router.post('/updateHighScore', async (req, res) => {
+    if (req.session.isAuthenticated) {
+        const userEmail = req.session.userEmail;
+        const { score } = req.body;
+        const user = await User.findOne({ email: userEmail });
+        if (user && score > user.highScore) {
+            user.highScore = score;
+            await user.save();
+        }
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(401);
+    }
+});
+
 module.exports = router;
