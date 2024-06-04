@@ -20,13 +20,14 @@ router.get('/', async (req, res) => {
     // 점수가 0 이상인 상위 10명의 유저를 조회
     const topUsers = await User.find({ highScore: { $gte: 1 } }).sort({ highScore: -1 }).limit(10);
 
-    res.render('index.njk', {
+    res.render('index.njk',{
         userName,
         isAuthenticated,
         userEmail,
         highScore,
         topUsers // topUsers를 뷰로 전달
     });
+    
 });
 
 

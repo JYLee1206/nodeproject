@@ -1,0 +1,31 @@
+<!-- views/highscore.njk -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title style="color:DodgerBlue;">최고점수</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <h1 style="color:DodgerBlue;">최고점수&nbsp;&nbsp;</h1>
+    <table>
+        <thead>
+            <tr>
+                <th style="color:DodgerBlue;">닉넥임&nbsp;&nbsp;</th>
+                
+                <th style="color:DodgerBlue;">최고점수</th>
+            </tr>
+        </thead>
+        <tbody style="color:DodgerBlue;">
+            {% for user in topUsers %}
+                <tr>
+                    <td>{{ user.username }}&nbsp;&nbsp;&nbsp;</td>
+                    <td>{{ user.highScore }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="logout-button" href="/">게임 시작</a>
+</body>
+</html>

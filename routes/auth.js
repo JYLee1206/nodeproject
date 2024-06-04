@@ -80,6 +80,16 @@ router.get('/logout', (req, res) => {
     });
 });
 
+router.get('/highscore', async (req, res) => {
+    try {
+        const topUsers = await User.find({}).sort({ highScore: -1 }).limit(10);
+        res.render('highscore.njk', { topUsers });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('서버 오류가 발생했습니다.');
+    }
+});
+
 router.post('/updateHighScore', async (req, res) => {
     if (req.session.isAuthenticated) {
         const userEmail = req.session.userEmail;

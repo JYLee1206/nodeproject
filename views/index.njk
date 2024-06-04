@@ -51,13 +51,14 @@
         });
     </script>
     <a class="logout-button" href="/logout">로그아웃</a>
+    <a class="highscore-button" href="/highscore">최고점수</a>
     {% else %}
     <a class="signup-button" href="/signup">회원가입</a>
     <a class="login-button" href="/login">로그인</a>
 
     <!-- 상위 10명 유저의 점수 표시 -->
-    <h2>Top 10 Scores</h2>
-    <ul>
+    <h2 style="color:DodgerBlue;">Top 10 Scores</h2>
+    <ul style="color:DodgerBlue;">
         {% for user in topUsers %}
             <li>{{ user.username }}: {{ user.highScore }}</li>
         {% endfor %}

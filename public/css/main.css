@@ -21,6 +21,7 @@ body {
     height: 100vh;
 }
 
+.highscore-button,
 .login-button,
 .logout-button,
 .signup-button {
@@ -46,6 +47,10 @@ body {
 .signup-button:hover {
     background-color: #16c5dcad;
     color: black;
+}
+
+.highscore-button{
+    right: 110px;
 }
 
 .signup-button {

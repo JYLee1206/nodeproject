@@ -1,5 +1,3 @@
-//public/js/tetris.js
-
 class Tetris {
     constructor() {
         this.stageWidth = 10;
@@ -14,6 +12,7 @@ class Tetris {
         this.blocks = this.createBlocks();
         this.deletedLines = 0;
         this.score = 0;
+        this.over = true;
 
         window.onkeydown = (e) => {
             if (e.keyCode === 37) {
@@ -122,6 +121,52 @@ class Tetris {
         }
     }
 
+    drawGhostBlock() {
+        let ghostY = this.blockY;
+        while (this.checkBlockMove(this.blockX, ghostY + 1, this.currentBlock, this.blockAngle)) {
+            ghostY++;
+        }
+        this.drawTransparentBlock(this.stageLeftPadding + this.blockX * this.cellSize,
+            this.stageTopPadding + ghostY * this.cellSize,
+            this.currentBlock, this.blockAngle, this.stageCanvas);
+    }
+    
+
+    drawTransparentBlock(x, y, type, angle, canvas) {
+        let context = canvas.getContext("2d");
+        let block = this.blocks[type];
+        for (let i = 0; i < block.shape[angle].length; i++) {
+            this.drawTransparentCell(context,
+                     x + (block.shape[angle][i][0] * this.cellSize),
+                     y + (block.shape[angle][i][1] * this.cellSize),
+                     this.cellSize,
+                     type);
+        }
+    }
+
+    drawTransparentCell(context, cellX, cellY, cellSize, type) {
+        let block = this.blocks[type];
+        let adjustedX = cellX + 0.5;
+        let adjustedY = cellY + 0.5;
+        let adjustedSize = cellSize - 1;
+        context.fillStyle = block.color;
+        context.globalAlpha = 0.5;
+        context.fillRect(adjustedX, adjustedY, adjustedSize, adjustedSize);
+        context.globalAlpha = 1.0;
+        context.strokeStyle = block.highlight;
+        context.beginPath();
+        context.moveTo(adjustedX, adjustedY + adjustedSize);
+        context.lineTo(adjustedX, adjustedY);
+        context.lineTo(adjustedX + adjustedSize, adjustedY);
+        context.stroke();
+        context.strokeStyle = block.shadow;
+        context.beginPath();
+        context.moveTo(adjustedX, adjustedY + adjustedSize);
+        context.lineTo(adjustedX + adjustedSize, adjustedY + adjustedSize);
+        context.lineTo(adjustedX + adjustedSize, adjustedY);
+        context.stroke();
+    }
+
     drawCell(context, cellX, cellY, cellSize, type) {
         let block = this.blocks[type];
         let adjustedX = cellX + 0.5;
@@ -144,37 +189,43 @@ class Tetris {
     }
 
     startGame() {
-        let virtualStage = new Array(this.stageWidth);
-        for (let i = 0; i < this.stageWidth; i++) {
-            virtualStage[i] = new Array(this.stageHeight).fill(null);
+        if (this.over){
+            let virtualStage = new Array(this.stageWidth);
+            for (let i = 0; i < this.stageWidth; i++) {
+                virtualStage[i] = new Array(this.stageHeight).fill(null);
+            }
+            this.virtualStage = virtualStage;
+            this.currentBlock = null;
+            this.nextBlock = this.getRandomBlock();
+            this.mainLoop();
         }
-        this.virtualStage = virtualStage;
-        this.currentBlock = null;
-        this.nextBlock = this.getRandomBlock();
-        this.mainLoop();
     }
 
     mainLoop() {
-        if (this.currentBlock == null) {
-            if (!this.createNewBlock()) {
-                return;
+        if (this.over){
+            if (this.currentBlock == null) {
+                if (!this.createNewBlock()) {
+                    return;
+                }
+            } else {
+                this.fallBlock();
             }
-        } else {
-            this.fallBlock();
+            this.drawStage();
+            if (this.currentBlock != null) {
+                this.drawGhostBlock();
+                this.drawBlock(this.stageLeftPadding + this.blockX * this.cellSize,
+                    this.stageTopPadding + this.blockY * this.cellSize,
+                    this.currentBlock, this.blockAngle, this.stageCanvas);
+            }
+            setTimeout(this.mainLoop.bind(this), 500);
         }
-        this.drawStage();
-        if (this.currentBlock != null) {
-            this.drawBlock(this.stageLeftPadding + this.blockX * this.cellSize,
-                this.stageTopPadding + this.blockY * this.cellSize,
-                this.currentBlock, this.blockAngle, this.stageCanvas);
-        }
-        setTimeout(this.mainLoop.bind(this), 500);
     }
 
     gameOver() {
         let messageElem = document.getElementById("message");
         messageElem.innerText = "GAME OVER";
         const score = this.score; // 현재 점수 가져오기
+        this.over = false;
         fetch('/updateHighScore', {
             method: 'POST',
             headers: {
@@ -206,7 +257,6 @@ class Tetris {
         return true;
     }
 
-
     drawNextBlock() {
         this.clear(this.nextCanvas);
         this.drawBlock(this.cellSize * 2, this.cellSize, this.nextBlock,
@@ -222,9 +272,14 @@ class Tetris {
             this.blockY++;
         } else {
             this.fixBlock(this.blockX, this.blockY, this.currentBlock, this.blockAngle);
-            this.currentBlock = null;
+            if (!this.createNewBlock()) {
+                this.gameOver();
+                return false;
+            }
         }
+        this.refreshStage();
     }
+    
 
     checkBlockMove(x, y, type, angle) {
         for (let i = 0; i < this.blocks[type].shape[angle].length; i++) {
@@ -251,6 +306,7 @@ class Tetris {
                 this.virtualStage[cellX][cellY] = type;
             }
         }
+    
         let linesCleared = 0;
         for (let y = this.stageHeight - 1; y >= 0; ) {
             let filled = true;
@@ -270,15 +326,12 @@ class Tetris {
                     this.virtualStage[x][0] = null;
                 }
                 linesCleared++;
-                //let linesElem = document.getElementById("lines");
                 this.deletedLines++;
-                //linesElem.innerText = "" + this.deletedLines;
             } else {
                 y--;
             }
         }
 
-        // 점수 계산
         if (linesCleared > 0) {
             this.updateScore(linesCleared);
         }
@@ -345,19 +398,19 @@ class Tetris {
     refreshStage() {
         this.clear(this.stageCanvas);
         this.drawStage();
+        this.drawGhostBlock();
         this.drawBlock(this.stageLeftPadding + this.blockX * this.cellSize,
                 this.stageTopPadding + this.blockY * this.cellSize,
                 this.currentBlock, this.blockAngle, this.stageCanvas);
     }
+    
 
     clear(canvas) {
         let context = canvas.getContext("2d");
         context.fillStyle = "rgb(0, 0, 0)";
         context.fillRect(0, 0, canvas.width, canvas.height);
     }
-
 }
-
 
 // 게임 시작시 아래 코드를 추가해 점수 요소를 초기화합니다.
 let tetrisGame = new Tetris();
