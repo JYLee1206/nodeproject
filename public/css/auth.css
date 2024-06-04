@@ -1,6 +1,10 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
+    background: url("../picture/tetris.jpg");
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
     margin: 0;
     padding: 0;
     display: flex;
@@ -10,7 +14,7 @@ body {
 }
 
 h2 {
-    color: #333;
+    color: #fff;
     text-align: center;
 }
 
