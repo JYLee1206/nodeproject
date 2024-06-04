@@ -1,3 +1,4 @@
+<!--views/index.njk-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +26,7 @@
                             <p>Next:</p>
                             <canvas id="next" width="150px" height="150px" style="background-color:black;">
                             </canvas>
-                            <p>LINES: <span id="lines">0</span></p>
+                            <p> My High Score: <span id="high-score">{{ highScore }}</span></p> <!-- 로그인 한 플레이어의 이름과 최고점수 표시 -->
                             <p>Score: <span id="score">0</span></p> <!-- 점수 표시 영역 -->
                             <p><span id="message"></span></p>
                             <div class="tetris-panel-container-padding"></div>

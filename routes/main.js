@@ -1,3 +1,4 @@
+//routes/main.js
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
@@ -7,6 +8,7 @@ router.get('/', async (req, res) => {
     const isAuthenticated = req.session.isAuthenticated || false;
     const userEmail = req.session.userEmail || '';
     let highScore = 0;
+    const userName = req.session.userName || '';
 
     if (isAuthenticated && userEmail) {
         const user = await User.findOne({ email: userEmail });
@@ -19,6 +21,7 @@ router.get('/', async (req, res) => {
     const topUsers = await User.find({ highScore: { $gte: 1 } }).sort({ highScore: -1 }).limit(10);
 
     res.render('index.njk', {
+        userName,
         isAuthenticated,
         userEmail,
         highScore,

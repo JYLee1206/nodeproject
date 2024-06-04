@@ -15,7 +15,7 @@ router.get('/login', (req, res) => {
 // 로그인 양식 제출 처리
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, email, password } = req.body;
         const user = await User.findOne({ email });
 
         if (!user) {
@@ -36,6 +36,7 @@ router.post('/login', async (req, res) => {
         // 로그인 성공 시 세션에 사용자 정보 저장
         req.session.isAuthenticated = true;
         req.session.userEmail = email;
+        req.session.userName = username;
 
         res.redirect('/');
     } catch (err) {

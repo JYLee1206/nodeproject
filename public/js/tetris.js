@@ -270,9 +270,9 @@ class Tetris {
                     this.virtualStage[x][0] = null;
                 }
                 linesCleared++;
-                let linesElem = document.getElementById("lines");
+                //let linesElem = document.getElementById("lines");
                 this.deletedLines++;
-                linesElem.innerText = "" + this.deletedLines;
+                //linesElem.innerText = "" + this.deletedLines;
             } else {
                 y--;
             }
@@ -288,7 +288,7 @@ class Tetris {
         const scorePerLines = [0, 100, 300, 500, 800];
         this.score += scorePerLines[linesCleared];
         let scoreElem = document.getElementById("score");
-        scoreElem.innerText = "Score: " + this.score;
+        scoreElem.innerText = this.score;
     }
 
     drawStage() {
