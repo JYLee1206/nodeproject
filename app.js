@@ -16,10 +16,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 // 세션 미들웨어 설정
 app.use(session({
-    key: 'sid',
+    key: 'sid', //세션 쿠키 이름 서버와 세션을 식별
     secret: 'mySecret', // 세션 암호화에 사용되는 비밀 키
-    resave: false,
-    saveUninitialized: true,
+    resave: false, // 불필요한 저장 방지
+    saveUninitialized: true, //세션 저장
     cookie: {
         maxAge: 24000 * 60 * 60 //쿠키 유효기간 24시간
     }

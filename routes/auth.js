@@ -80,6 +80,29 @@ router.get('/logout', (req, res) => {
     });
 });
 
+// 회원 탈퇴 처리
+router.get('/withdraw', (req, res) => {
+    res.render('withdrawConfirmation.njk');
+});
+
+router.post('/withdraw', async (req, res) => {
+    try {
+        const userEmail = req.session.userEmail;
+        await User.findOneAndDelete({ email: userEmail });
+        req.session.destroy((err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('로그아웃 중 오류가 발생했습니다.');
+            }
+            res.clearCookie('sid'); // 사용자 정보 쿠키 삭제
+            res.redirect('/');
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('서버 오류가 발생했습니다.');
+    }
+});
+
 router.get('/highscore', async (req, res) => {
     try {
         const topUsers = await User.find({}).sort({ highScore: -1 }).limit(10);

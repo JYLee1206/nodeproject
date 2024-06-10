@@ -10,9 +10,10 @@
     <script type="text/javascript" src="/js/tetris.js"></script>
 </head>
 <body>
-    {% if isAuthenticated %}
+    {% if isAuthenticated %} <!-- 로그인했을 경우 게임 화면-->
     <div class="game-start">
         <button id="start-game-button">게임 시작</button> <!-- 중앙에 게임 시작 버튼 -->
+        <!--<button id="du-game-button">멀티 시작</button> --><!-- 중앙에 게임 시작 버튼 -->
     </div>
     <script>
         document.getElementById('start-game-button').addEventListener('click', function() {
@@ -52,7 +53,8 @@
     </script>
     <a class="logout-button" href="/logout">로그아웃</a>
     <a class="highscore-button" href="/highscore">최고점수</a>
-    {% else %}
+    <a class="withdraw-button" href="/withdraw">회원 탈퇴</a> 
+    {% else %} <!-- 로그인안했을 경우 화면-->
     <a class="signup-button" href="/signup">회원가입</a>
     <a class="login-button" href="/login">로그인</a>
 
